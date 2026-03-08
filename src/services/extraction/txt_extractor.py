@@ -5,4 +5,5 @@ from typing import List
 class TXTExtractor(BaseExtractionService):
     @staticmethod
     async def extract_content(file: UploadFile) -> str | List[dict]:
-        return await file.read()
+        content = await file.read()
+        return content.decode('utf-8')
