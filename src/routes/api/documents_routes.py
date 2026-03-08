@@ -28,12 +28,37 @@ async def index_content(document: UploadFile) -> DocumentSchema:
         embeddings=embeddings
     )
 
-@documents_router.get('/search')
-async def search(query: str):
+@documents_router.get('/simple-search')
+async def simple_search(query: str):
     results = search_engine.search(query)
 
     hits = [
         hit['_source'] for hit in results['hits']['hits']
+    ]
+
+    return hits
+
+@documents_router.get('/fuzzy-optimized-search')
+async def optimized_search(query: str):
+    results = search_engine.fuzzy_search(query)
+
+    hits = [
+        hit['_source'] for hit in results['hits']['hits']
+    ]
+
+    return hits
+
+@documents_router.get('/hybrid-search')
+async def hybrid_search(query: str):
+    results = search_engine.hybrid_search(query)
+
+    hits = [
+        { 
+            'index': hit['_index'],
+            'score': hit['_score'],
+            'source': hit['_source']
+        } 
+        for hit in results['hits']['hits']
     ]
 
     return hits
