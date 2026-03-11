@@ -6,3 +6,4 @@ class DocumentSchema(BaseModel):
     extension: str
     content: str | List[dict]
     embeddings: List[float]
+    elapsed_time: float

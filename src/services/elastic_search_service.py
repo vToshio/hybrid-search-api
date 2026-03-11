@@ -20,7 +20,7 @@ class ElasticsearchService:
             index=self.index_name,
             query={
                 'match': {
-                    'content': query
+                    'content': query,
                 }
             }
         )
@@ -32,8 +32,9 @@ class ElasticsearchService:
                 'match': {
                     'content': {
                         'query': query,
-                        'fuzziness': 2,    # pode ser [0, 1, 2]
-                        'prefix_length': 1 
+                        'fuzziness': 'AUTO',    # pode ser [0, 1, 2]
+                        'prefix_length': 1,
+                        'boost': 0.3 
                     }
                 }
             }
