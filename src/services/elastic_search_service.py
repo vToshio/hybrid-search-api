@@ -11,6 +11,17 @@ class ElasticsearchService:
             index=self.index_name,
             document=content
         )
+    
+    async def recreate_index(self):
+        if await self.client.indices.exists(index=self.index_name):
+            await self.client.options(ignore_status=[400, 404]).indices.delete(index=self.index_name)
+        
+        response = await self.client.indices.create(index=self.index_name)
+
+        return {
+            'index_name': self.index_name,
+            'body': response.body
+        }
 
     # Obs: Verificar a possibilidade de adicionar uma "strategy" para identificar
     # o tipo de pesquisa futuramente, a partir de parametrizações, e manter na API

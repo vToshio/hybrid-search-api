@@ -31,6 +31,10 @@ async def index_content(document: UploadFile, search_engine = Depends(get_es_ser
         elapsed_time= time.time() - start
     )
 
+@documents_router.delete('/recreate-index')
+async def recreate_index(search_engine = Depends(get_es_service)):
+    return await search_engine.recreate_index()
+
 @documents_router.get('/simple-search')
 async def simple_search(query: str, search_engine = Depends(get_es_service)):
     start = time.time()
