@@ -1,22 +1,21 @@
-from fastapi import APIRouter, UploadFile
+from fastapi import APIRouter, UploadFile, Depends
 
 from src.schemas.document_schema import DocumentSchema
 from src.services.document_service import DocumentService
 from src.services.embedding_service import EmbeddingsService
-from src.services.elastic_search_service import ElasticsearchService
+from src.dependencies.elasticsearch import get_es_service
 
 import time
 
 documents_router = APIRouter(prefix='/documents')
-search_engine = ElasticsearchService('documents')
 
 @documents_router.post('/index-content')
-async def index_content(document: UploadFile) -> DocumentSchema:
+async def index_content(document: UploadFile, search_engine = Depends(get_es_service)) -> DocumentSchema:
     start = time.time()
     file = DocumentService(document)
     content = await file.get_file_content()
     embeddings = EmbeddingsService.generate_embeddings(content)
-    search_engine.index_document(
+    await search_engine.index_document(
         content={
             'name': file.name,
             'content': content,
@@ -33,9 +32,9 @@ async def index_content(document: UploadFile) -> DocumentSchema:
     )
 
 @documents_router.get('/simple-search')
-async def simple_search(query: str):
+async def simple_search(query: str, search_engine = Depends(get_es_service)):
     start = time.time()
-    results = search_engine.search(query)
+    results = await search_engine.search(query)
     end = time.time()
 
     hits = {
@@ -45,13 +44,12 @@ async def simple_search(query: str):
         ]
     } 
     
-
     return hits
 
 @documents_router.get('/fuzzy-optimized-search')
-async def optimized_search(query: str):
+async def optimized_search(query: str, search_engine = Depends(get_es_service)):
     start = time.time()
-    results = search_engine.fuzzy_search(query)
+    results = await search_engine.fuzzy_search(query)
     end = time.time()
 
     hits = {
@@ -64,9 +62,9 @@ async def optimized_search(query: str):
     return hits
 
 @documents_router.get('/hybrid-search')
-async def hybrid_search(query: str):
+async def hybrid_search(query: str, search_engine=Depends(get_es_service)):
     start = time.time()
-    results = search_engine.hybrid_search(query)
+    results = await search_engine.hybrid_search(query)
     end = time.time()
 
     hits = {
