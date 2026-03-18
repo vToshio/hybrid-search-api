@@ -11,6 +11,7 @@ A aplicação implementa uma API RESTful que utiliza técnicas avançadas de **P
 * **Sentence Transformers:** Interface para modelos do Hugging Face. Utiliza o modelo `multilingual-e5-base` (768 dimensões) para geração de vetores densos.
 * **Elasticsearch:** Motor de busca e banco de dados vetorial (Vector Store) responsável pela indexação e execução do algoritmo de busca híbrida.
 * **Docker & Docker Compose:** Orquestração do ambiente, garantindo que a API e o Elasticsearch rodem em containers isolados.
+* **Padrões de Projeto:** Utilização de Padrões Singleton para clientes de conexão e Factory/Strategy para métodos de extração de conteúdos de diferentes tipos de documentos (.pdf e .txt).
 
 ## 🔍 Como funciona a Pesquisa Híbrida?
 O diferencial deste projeto é a combinação de dois métodos de recuperação:

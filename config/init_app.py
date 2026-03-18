@@ -1,9 +1,9 @@
 from fastapi import FastAPI
+
 from contextlib import asynccontextmanager
 from elasticsearch import AsyncElasticsearch
 from config.elasticsearch.indexes_config import *
 
-from src.routes.hello_routes import hello_router
 from src.routes.api.documents_routes import documents_router
 
 @asynccontextmanager
@@ -33,7 +33,6 @@ def init_app(debug: bool = False, ) -> FastAPI:
         lifespan=lifespan
     )
     
-    # app.include_router(hello_router, prefix='/api')
     app.include_router(documents_router, prefix='/api')
 
     return app

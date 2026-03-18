@@ -1,8 +1,5 @@
 from fastapi import APIRouter, UploadFile, Depends, BackgroundTasks
 
-from src.schemas.document_schema import DocumentSchema
-from src.schemas.chunk_schema import ChunkSchema
-
 from src.services.document_service import DocumentService
 from src.services.chunk_service import ChunkService
 from src.services.embedding_service import EmbeddingsService
