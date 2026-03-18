@@ -1,13 +1,9 @@
 from config.initializers.embeddings_model import EmbeddingsModel
-
-from dotenv import load_dotenv
+from config.settings import settings
 from typing import List
-from os import getenv
-
-load_dotenv()
 
 class EmbeddingsService:
-    _model_name = getenv('HF_MODEL')
+    _model_name = settings.hf_model
     _model = EmbeddingsModel.get()
 
     @classmethod

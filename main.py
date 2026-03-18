@@ -1,17 +1,14 @@
 from config.init_app import init_app
-from dotenv import load_dotenv
-from os import getenv
+from config.settings import settings
 import uvicorn
-
-load_dotenv()
 
 def main():
     app = init_app()
 
     uvicorn.run(
         app=app, 
-        host=getenv('HOST'),
-        port=int(getenv('PORT'))
+        host=settings.server_host,
+        port=settings.server_port
     )
 
 if __name__ == "__main__":

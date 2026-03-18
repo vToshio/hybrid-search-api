@@ -1,9 +1,9 @@
-from os import getenv
+from config.settings import settings
 
 documents_index_body = {
     'settings': {
-        'number_of_shards': getenv('ES_SHARDS_NUMBER', 1),
-        'number_of_replicas': getenv('ES_REPLICAS_NUMBER', 0)
+        'number_of_shards': settings.es_shards_number,
+        'number_of_replicas': settings.es_replicas_number
     },
     'mappings': {
         'properties': {
@@ -11,7 +11,7 @@ documents_index_body = {
             'content': { 'type': 'text' },
             'embeddings': { 
                 'type': 'dense_vector', 
-                'dims': 768,            
+                'dims': settings.hf_model_dims,            
                 'index': True,
                 'similarity': 'cosine' 
             }
@@ -21,8 +21,8 @@ documents_index_body = {
 
 documents_index_body_v2 = {
     'settings': {
-        'number_of_shards': getenv('ES_SHARDS_NUMBER', 1),
-        'number_of_replicas': getenv('ES_REPLICAS_NUMBER', 0),
+        'number_of_shards': settings.es_shards_number,
+        'number_of_replicas': settings.es_replicas_number,
         
         # Configurando os parâmetros do BM-25
         'index': {
@@ -56,7 +56,7 @@ documents_index_body_v2 = {
             # Configurando o embedding
             'embeddings': {
                 'type': 'dense_vector',
-                'dims': int(getenv('HF_MODEL_DIMS', 768)),
+                'dims': settings.hf_model_dims,
                 'similarity': 'cosine',
                 'index': True,
                 'index_options': {
