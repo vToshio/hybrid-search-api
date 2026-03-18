@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     es_replicas_number: int = 0
 
     hf_token: str
-    hf_model: str = 'all-mpnet-base-v2'
+    hf_model: str = 'intfloat/multilingual-e5-base'
     hf_model_dims: int = 768
 
     model_config = SettingsConfigDict(

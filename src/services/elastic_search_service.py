@@ -57,27 +57,35 @@ class ElasticsearchService:
 
         return await self.client.search(
             index=self.index_name,
-            size=10,
+            size=5,
+            min_score=3,
             query={
-                'match': {
-                    'content': {
-                        'query': query,
-                        'fuzziness': 'AUTO',    
-                        'boost': 0.3
-                    }
+                'bool': {
+                    'should': [
+                        {
+                            'match': {
+                                'content': {
+                                    'query': query,
+                                    'fuzziness': 'AUTO',
+                                    'boost': 0.3
+                                }
+                            }
+                        }
+                    ]
                 }
             },
             knn={
                 'field': 'embeddings',
                 'query_vector': query_vector,
                 'k': 10,
-                'num_candidates': 100
+                'num_candidates': 50,
+                'boost': 5.0
             },
             collapse={
                 'field': 'document_name',
                 'inner_hits': {
                     'name': 'best_scores',
-                    'size': 5,
+                    'size': 3,
                     'sort': [ { '_score': 'desc' } ]
                 }
             }

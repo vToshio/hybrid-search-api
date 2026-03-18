@@ -58,10 +58,7 @@ documents_index_body_v2 = {
                 'type': 'dense_vector',
                 'dims': settings.hf_model_dims,
                 'similarity': 'cosine',
-                'index': True,
-                'index_options': {
-                    'type': 'bbq_hnsw'
-                }
+                'index': True
             }
         }
     }
