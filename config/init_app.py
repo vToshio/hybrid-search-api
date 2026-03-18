@@ -33,7 +33,7 @@ def init_app(debug: bool = False, ) -> FastAPI:
         lifespan=lifespan
     )
     
-    app.include_router(hello_router, prefix='/api')
+    # app.include_router(hello_router, prefix='/api')
     app.include_router(documents_router, prefix='/api')
 
     return app
