@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from elasticsearch import AsyncElasticsearch
-from config.elasticsearch.indexes_config import documents_index_body
+from config.elasticsearch.indexes_config import *
 
 from src.routes.hello_routes import hello_router
 from src.routes.api.documents_routes import documents_router
@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
         try:
             await es.indices.create(
                 index='documents',
-                body=documents_index_body
+                body=documents_index_body_v2
             )
         except ConnectionError as e:
             print(f'[ELASTICSEARCH CONNECTION ERROR]: {str(e)}')

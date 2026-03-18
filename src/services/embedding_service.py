@@ -11,5 +11,5 @@ class EmbeddingsService:
     _model = EmbeddingsModel.get()
 
     @classmethod
-    def generate_embeddings(cls, text: str) -> List[float]:
-        return cls._model.encode(text)
+    def generate_embeddings(cls, text: List[str], batch_size: int = 32) -> List[float]:
+        return cls._model.encode(text, batch_size=batch_size, show_progress_bar=False)

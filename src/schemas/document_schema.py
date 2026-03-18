@@ -1,9 +1,10 @@
 from pydantic import BaseModel
 from typing import List
 
+from src.schemas.chunk_schema import ChunkSchema
+
 class DocumentSchema(BaseModel):
-    name: str
+    document_name: str
     extension: str
-    content: str | List[dict]
-    embeddings: List[float]
+    chunks: List[ChunkSchema]
     elapsed_time: float

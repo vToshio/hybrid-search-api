@@ -1,59 +1,68 @@
-from fastapi import APIRouter, UploadFile, Depends
+from fastapi import APIRouter, UploadFile, Depends, BackgroundTasks
 
 from src.schemas.document_schema import DocumentSchema
+from src.schemas.chunk_schema import ChunkSchema
+
 from src.services.document_service import DocumentService
+from src.services.chunk_service import ChunkService
 from src.services.embedding_service import EmbeddingsService
+from src.services.elastic_search_service import ElasticsearchService
 from src.dependencies.elasticsearch import get_es_service
 
 import time
 
 documents_router = APIRouter(prefix='/documents')
 
-@documents_router.post('/index-content')
-async def index_content(document: UploadFile, search_engine = Depends(get_es_service)) -> DocumentSchema:
+async def process_and_index(text: str, doc_name: str, search_engine: ElasticsearchService):
+    chunks = ChunkService.split(text)
+    texts = [chunk.page_content for chunk in chunks]
+
+    embeddings_list = EmbeddingsService.generate_embeddings(texts)
+    
+    bulk_data = []
+    for index, (txt, emb) in enumerate(zip(texts, embeddings_list)):
+        bulk_data.append({
+            'content': txt,
+            'embeddings': emb.tolist(),
+            'document_name': doc_name,
+            'chunk_id': index
+        })
+
+    await search_engine.bulk_index_documents(bulk_data)
+
+@documents_router.post('/store')
+async def index_content(
+    document: UploadFile, 
+    background_tasks: BackgroundTasks,
+    search_engine = Depends(get_es_service)
+) -> dict:
     start = time.time()
+
     file = DocumentService(document)
-    content = await file.get_file_content()
-    embeddings = EmbeddingsService.generate_embeddings(content)
-    await search_engine.index_document(
-        content={
-            'name': file.name,
-            'content': content,
-            'embeddings': embeddings
-        }
+    raw = await file.get_file_content()
+
+    background_tasks.add_task(
+        process_and_index,
+        raw,
+        file.name,
+        search_engine
     )
     
-    return DocumentSchema(
-        name=file.name,
-        extension=file.extension,
-        content=content,
-        embeddings=embeddings,
-        elapsed_time= time.time() - start
-    )
+    return {
+        'document_name': file.name,
+        'status': 'Processado',
+        'elapsed_time': time.time() - start
+    }
 
 @documents_router.delete('/recreate-index')
 async def recreate_index(search_engine = Depends(get_es_service)):
     return await search_engine.recreate_index()
 
-@documents_router.get('/simple-search')
-async def simple_search(query: str, search_engine = Depends(get_es_service)):
+
+@documents_router.get('/search')
+async def search(query: str, search_engine = Depends(get_es_service)):
     start = time.time()
     results = await search_engine.search(query)
-    end = time.time()
-
-    hits = {
-        'elapsed_time': end - start,
-        'hits': [
-            hit['_source'] for hit in results['hits']['hits']
-        ]
-    } 
-    
-    return hits
-
-@documents_router.get('/fuzzy-optimized-search')
-async def optimized_search(query: str, search_engine = Depends(get_es_service)):
-    start = time.time()
-    results = await search_engine.fuzzy_search(query)
     end = time.time()
 
     hits = {
