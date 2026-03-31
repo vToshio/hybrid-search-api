@@ -4,7 +4,8 @@ from typing import List
 class ChunkService:
     _splitter = RecursiveCharacterTextSplitter(
         chunk_size=800,
-        chunk_overlap=100
+        chunk_overlap=150,
+        separators=["\n\n\n","\n\n", "\n", ".", "!", "?", ";", ",", " ", ""]
     )
 
     @classmethod

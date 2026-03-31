@@ -15,7 +15,7 @@ async def process_and_index(text: str, doc_name: str, search_engine: Elasticsear
     texts = [chunk.page_content for chunk in chunks]
 
     embeddings_list = EmbeddingsService.generate_embeddings(texts, is_query=False)
-    
+
     bulk_data = []
     for index, (txt, emb) in enumerate(zip(texts, embeddings_list)):
         bulk_data.append({
@@ -73,21 +73,22 @@ async def search(query: str, search_engine = Depends(get_es_service)):
 
 @documents_router.get('/hybrid-search')
 async def hybrid_search(query: str, search_engine=Depends(get_es_service)):
-    start = time.time()
+    start = time.perf_counter()
     results = await search_engine.hybrid_search(query)
-    end = time.time()
+    end = time.perf_counter()
 
-    hits = [{
-        'document_name': hit['_source'].get('document_name'),
-        'chunk_id': hit['_source'].get('chunk_id'),
-        'score': hit['_score'],
-        'content': hit['_source'].get('content')
-    } for hit in results['hits']['hits']]
-
+    hits = []
     processed_inner_hits = []
     for doc_hit in results['hits']['hits']:
+        source = doc_hit['_source']
+        hits.append({
+            'document_name': source.get('document_name'),
+            'chunk_id': source.get('chunk_id'),
+            'score': doc_hit['_score'],
+            'content': source.get('content')
+        })
+        
         inner_hits_data = doc_hit.get('inner_hits', {}).get('best_scores', {}).get('hits', {}).get('hits', {})
-
         for chunk_hit in inner_hits_data:
             processed_inner_hits.append({
                 'document_name': doc_hit['_source'].get('document_name'),

@@ -4,6 +4,7 @@ from src.services.embedding_service import EmbeddingsService
 from config.elasticsearch.indexes_config import *
 
 from typing import List
+import asyncio
 
 class ElasticsearchService:
     def __init__(self, client: AsyncElasticsearch, index_name: str = 'documents'):
@@ -46,14 +47,19 @@ class ElasticsearchService:
                         'query': query,
                         'fuzziness': 'AUTO',
                         'prefix_length': 1,
-                        'boost': 0.3
-                    }
+                        'boost': 1.0
+                    },
                 }
             }
         )
 
     async def hybrid_search(self, query: str):
-        query_vector = EmbeddingsService.generate_embeddings(query)
+        loop = asyncio.get_running_loop()
+        query_vector = await loop.run_in_executor(
+            None,
+            EmbeddingsService.generate_embeddings,
+            query
+        )
 
         return await self.client.search(
             index=self.index_name,
@@ -67,7 +73,7 @@ class ElasticsearchService:
                                 'content': {
                                     'query': query,
                                     'fuzziness': 'AUTO',
-                                    'boost': 0.3
+                                    'boost': 0.6
                                 }
                             }
                         }
@@ -78,8 +84,8 @@ class ElasticsearchService:
                 'field': 'embeddings',
                 'query_vector': query_vector,
                 'k': 10,
-                'num_candidates': 50,
-                'boost': 5.0
+                'num_candidates': 100,
+                'boost': 1.6
             },
             collapse={
                 'field': 'document_name',

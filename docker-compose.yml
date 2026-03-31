@@ -10,7 +10,8 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     networks:
       - prototype-network
   
@@ -32,6 +33,12 @@ services:
       - elastic_data:/usr/share/elasticsearch/data
     networks:
       - prototype-network
+    healthcheck:
+      test: ["CMD", "curl", "-XGET", "http://localhost:9200/_cluster/health?pretty"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
 
 volumes:
   elastic_data:
